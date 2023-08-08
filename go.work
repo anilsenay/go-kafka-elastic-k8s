@@ -4,4 +4,5 @@ use (
 	./01-kafka/01-basic-example
 	./01-kafka/02-basic-example-2-partitions
 	./01-kafka/03-queue-2-consumer-2-partitions
+	./01-kafka/04-queue-3-consumer-2-partitions
 )
