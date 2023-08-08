@@ -19,17 +19,17 @@ go run producer/cmd/main.go -count=100
 #### Consumer 1
 
 ```bash
-go run consumer-0/consumer.go
+go run consumer-0/consumer.go -group=group0
 ```
 
 #### Consumer 2
 
 ```bash
-go run consumer-1/consumer.go
+go run consumer-1/consumer.go -group=group1
 ```
 
 #### Consumer 3
 
 ```bash
-go run consumer-2/consumer.go
+go run consumer-2/consumer.go -group=group2
 ```
