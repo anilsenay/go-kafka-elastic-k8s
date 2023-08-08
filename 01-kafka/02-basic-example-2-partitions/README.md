@@ -1,6 +1,6 @@
-1 producer, 2 consumers, 2 partitions
+1 producer, 1 consumers, 2 partitions
 
-Producer sends messages to 2 partitions. Each consumer reads from one partition.
+Producer sends messages to 2 partitions. Consumer reads from specific partition which is specified by flag `-partition`.
 
 ## Run
 
@@ -19,5 +19,5 @@ go run producer/cmd/main.go -count=100 -partition=0
 #### Consumer
 
 ```bash
-go run consumer-0/consumer.go -partition=0
+go run consumer/consumer.go -partition=0
 ```

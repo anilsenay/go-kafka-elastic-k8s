@@ -1,6 +1,6 @@
-1 producer, 2 consumers, 2 partitions
+1 producer, 3 consumers, 2 partitions
 
-Producer sends messages to 2 partitions. Each consumer reads from one partition.
+Producer sends messages to 2 partitions. Each consumer TRY to read from one partition without specify partition. But only one consumer can read from each partition. So last consumer will not read any message.
 
 ## Run
 
