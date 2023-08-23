@@ -7,4 +7,5 @@ use (
 	./01-kafka/04-queue-3-consumer-2-partitions
 	./01-kafka/05-pubsub-3-consumer-1-partitions
 	./01-kafka/06-replication
+	./02-elasticsearch/feed
 )
