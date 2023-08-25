@@ -161,3 +161,326 @@ GET news_headlines/_search
   }
 }
 ```
+
+# Part 3
+
+```
+# Precision --> I want all the retrieved results to be a perfect match even if returns less document
+# Recall --> I want to retrieve more results even if they not be a perfect match
+
+# match query --> OR
+
+# match --> alakasız sonuçlar da geliyor
+GET news_headlines/_search
+{
+  "query": {
+    "match": {
+      "headline": {
+        "query": "Shape of you"
+      }
+    }
+  }
+}
+
+# match_phrase
+GET news_headlines/_search
+{
+  "query": {
+    "match_phrase": {
+      "headline": {
+        "query": "Shape of you"
+      }
+    }
+  }
+}
+
+# multiple fields
+# açıklamada geçiyor ama headline'ın alakası az sonuçlar önce geliyor
+GET news_headlines/_search
+{
+  "query": {
+    "multi_match": {
+        "query": "Michelle Obama",
+        "fields": [
+          "headline",
+          "short_description",
+          "authors"
+        ]
+    }
+  }
+}
+
+# boost
+GET news_headlines/_search
+{
+  "query": {
+    "multi_match": {
+        "query": "Michelle Obama",
+        "fields": [
+          "headline^2",
+          "short_description",
+          "authors"
+        ]
+    }
+  }
+}
+
+# multi_match --> OR şeklinde çalışıyor. Yine alakasız sonuçlar geliyor:
+GET news_headlines/_search
+{
+  "query": {
+    "multi_match": {
+        "query": "party planning",
+        "fields": [
+          "headline^2",
+          "short_description"
+        ]
+    }
+  }
+}
+
+# multi_match + match_phrase
+GET news_headlines/_search
+{
+  "query": {
+    "multi_match": {
+        "query": "party planning",
+        "fields": [
+          "headline^2",
+          "short_description"
+        ],
+        "type": "phrase"
+    }
+  }
+}
+
+## Combined Queries --> Bool Query
+
+# Headline'da "Michelle Obama" içeren "POLITICS" kategorisinden "2016" öncesi haberleri getir???
+
+# Bool Query
+# Must
+GET news_headlines/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match_phrase": {
+            "headline": "Michelle Obama"
+          }
+        },
+        {
+          "match": {
+            "category": "POLITICS"
+          }
+        }
+      ]
+    }
+  }
+}
+
+# Must Not
+GET news_headlines/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match_phrase": {
+            "headline": "Michelle Obama"
+          }
+        }
+      ],
+      "must_not": [
+        {
+          "match": {
+            "category": "WEDDINGS"
+          }
+        }
+      ]
+    }
+  }
+}
+
+# Should --> Nice to have (higher score)
+GET news_headlines/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match_phrase": {
+            "headline": "Michelle Obama"
+          }
+        }
+      ],
+      "should": [
+        {
+          "match_phrase": {
+            "category": "BLACK VOICES"
+          }
+        }
+      ]
+    }
+  }
+}
+
+# Filter
+GET news_headlines/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match_phrase": {
+            "headline": "Michelle Obama"
+          }
+        }
+      ],
+      "filter": {
+        "range": {
+          "date": {
+            "gte": "2014-03-25",
+            "lte": "2016-03-25"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+# Part 4
+
+```
+# Dataset --> https://www.kaggle.com/datasets/carrie1/ecommerce-data
+
+GET ecommerce_data/_search
+
+# Aggregations
+
+GET ecommerce_data/_search
+{
+  "aggs": {
+    "sum_unit_price": {
+      "sum": {
+        "field": "UnitPrice"
+      }
+    }
+  }
+}
+
+# Hits gelmesin istiyorsak
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "sum_unit_price": {
+      "sum": {
+        "field": "UnitPrice"
+      }
+    }
+  }
+}
+
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "max_unit_price": {
+      "max": {
+        "field": "UnitPrice"
+      }
+    }
+  }
+}
+
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "avg_unit_price": {
+      "avg": {
+        "field": "UnitPrice"
+      }
+    }
+  }
+}
+
+# Cardinality
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "num_of_unique_customers": {
+      "cardinality": {
+        "field": "CustomerID"
+      }
+    }
+  }
+}
+
+# Query + Aggs
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "query": {
+    "match": {
+      "Country": "Germany"
+    }
+  },
+  "aggs": {
+    "germany_avg_unit_price": {
+      "avg": {
+        "field": "UnitPrice"
+      }
+    }
+  }
+}
+
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "top_5_customer": {
+      "terms": {
+        "field": "CustomerID",
+        "size": 5
+      }
+    }
+  }
+}
+
+# Order
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "top_5_customer": {
+      "terms": {
+        "field": "CustomerID",
+        "size": 5,
+        "order": {
+          "_count": "asc"
+        }
+      }
+    }
+  }
+}
+
+# Script
+GET ecommerce_data/_search
+{
+  "size": 0,
+  "aggs": {
+    "daily_revenue": {
+      "sum": {
+        "script": {
+          "source": "doc['UnitPrice'].value * doc['Quantity'].value"
+        }
+      }
+    }
+  }
+}
+```
