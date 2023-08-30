@@ -92,7 +92,14 @@ func (h *SearchHandler) handleSearch(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.JSON(res.Hits.Hits)
+	var products = make([]models.Product, len(res.Hits.Hits))
+	for i, hit := range res.Hits.Hits {
+		var product models.Product
+		json.Unmarshal(hit.Source_, &product)
+		products[i] = product
+	}
+
+	return c.JSON(products)
 }
 
 func (h *SearchHandler) SetRoutes(app *fiber.App) {

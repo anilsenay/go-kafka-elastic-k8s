@@ -9,10 +9,10 @@ import (
 )
 
 type Product struct {
-	Id         int64   `json:"id"`
-	Title      string  `json:"title"`
-	Price      float64 `json:"price"`
-	CategoryId string  `json:"category_id"`
+	Id       int64   `json:"id"`
+	Title    string  `json:"title"`
+	Price    float64 `json:"price"`
+	Category string  `json:"category"`
 }
 
 var categoryCache = map[int64]string{130: "Cep Telefonları"}
@@ -35,11 +35,11 @@ func main() {
 	}
 
 	products := []Product{
-		{Id: random.RandomId(), Title: random.GetRandomTitle(), Price: random.RandomPrice(), CategoryId: categoryCache[130]},
-		{Id: random.RandomId(), Title: random.GetRandomTitle(), Price: random.RandomPrice(), CategoryId: categoryCache[130]},
-		{Id: random.RandomId(), Title: random.GetRandomTitle(), Price: random.RandomPrice(), CategoryId: categoryCache[130]},
-		{Id: random.RandomId(), Title: random.GetRandomTitle(), Price: random.RandomPrice(), CategoryId: categoryCache[130]},
-		{Id: random.RandomId(), Title: random.GetRandomTitle(), Price: random.RandomPrice(), CategoryId: categoryCache[130]},
+		{Id: random.RandomId(), Title: random.GetRandomTitle(), Price: random.RandomPrice(), Category: categoryCache[130]},
+		{Id: random.RandomId(), Title: random.GetRandomTitle(), Price: random.RandomPrice(), Category: categoryCache[130]},
+		{Id: random.RandomId(), Title: random.GetRandomTitle(), Price: random.RandomPrice(), Category: categoryCache[130]},
+		{Id: random.RandomId(), Title: random.GetRandomTitle(), Price: random.RandomPrice(), Category: categoryCache[130]},
+		{Id: random.RandomId(), Title: random.GetRandomTitle(), Price: random.RandomPrice(), Category: categoryCache[130]},
 	}
 
 	for _, product := range products {
