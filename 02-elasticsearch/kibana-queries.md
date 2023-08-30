@@ -484,3 +484,239 @@ GET ecommerce_data/_search
   }
 }
 ```
+
+## Part 5
+
+```
+# dynamic mapping
+POST temp_index/_doc
+{
+  "name": "Pineapple",
+  "botanical_name": "Ananas comosus",
+  "produce_type": "Fruit",
+  "country_of_origin": "New Zealand",
+  "date_purchased": "2020-06-02T12:15:35",
+  "quantity": 200,
+  "unit_price": 3.11,
+  "description": "a large juicy tropical fruit consisting of aromatic edible yellow flesh surrounded by a tough segmented skin and topped with a tuft of stiff leaves.These pineapples are sourced from New Zealand.",
+  "vendor_details": {
+    "vendor": "Tropical Fruit Growers of New Zealand",
+    "main_contact": "Hugh Rose",
+    "vendor_location": "Whangarei, New Zealand",
+    "preferred_vendor": true
+  }
+}
+
+GET temp_index/_mapping
+
+# Text --> full-text search (texy analysis)
+# Keyword --> exact searches, aggs, sorting
+
+# Custom Mapping
+## Rules
+
+### - If you do not define a mapping ahead of time, Elasticsearch dynamically creates the mapping for you.
+### - If you do decide to define your own mapping, you can do so at index creation.
+### - ONE mapping is defined per index. Once the index has been created, we can only add new fields to a mapping. We CANNOT change the mapping of an existing field.
+### - If you must change the type of an existing field, you must create a new index with the desired mapping, then reindex all documents into the new index.
+
+## same document
+POST test_index/_doc
+{
+  "name": "Pineapple",
+  "botanical_name": "Ananas comosus",
+  "produce_type": "Fruit",
+  "country_of_origin": "New Zealand",
+  "date_purchased": "2020-06-02T12:15:35",
+  "quantity": 200,
+  "unit_price": 3.11,
+  "description": "a large juicy tropical fruit consisting of aromatic edible yellow flesh surrounded by a tough segmented skin and topped with a tuft of stiff leaves.These pineapples are sourced from New Zealand.",
+  "vendor_details": {
+    "vendor": "Tropical Fruit Growers of New Zealand",
+    "main_contact": "Hugh Rose",
+    "vendor_location": "Whangarei, New Zealand",
+    "preferred_vendor": true
+  }
+}
+
+GET temp_index/_mapping
+
+# Copy mapping and remove "temp_index"
+# change description, name --> text only
+# change product_type --> keyword only
+# botanical_name, vendor_details --> kullanılmayacak
+
+PUT optimized_index
+{
+  "mappings": {
+    "properties": {
+      "botanical_name": {
+        "enabled": false
+      },
+      "country_of_origin": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "date_purchased": {
+        "type": "date"
+      },
+      "description": {
+        "type": "text"
+      },
+      "name": {
+        "type": "text"
+      },
+      "produce_type": {
+        "type": "keyword"
+      },
+      "quantity": {
+        "type": "long"
+      },
+      "unit_price": {
+        "type": "float"
+      },
+      "vendor_details": {
+        "enabled": false
+      }
+    }
+  }
+}
+
+GET optimized_index/_mapping
+
+POST optimized_index/_doc
+{
+  "name": "Pineapple",
+  "botanical_name": "Ananas comosus",
+  "produce_type": "Fruit",
+  "country_of_origin": "New Zealand",
+  "date_purchased": "2020-06-02T12:15:35",
+  "quantity": 200,
+  "unit_price": 3.11,
+  "description": "a large juicy tropical fruit consisting of aromatic edible yellow flesh surrounded by a tough segmented skin and topped with a tuft of stiff leaves.These pineapples are sourced from New Zealand.",
+  "vendor_details": {
+    "vendor": "Tropical Fruit Growers of New Zealand",
+    "main_contact": "Hugh Rose",
+    "vendor_location": "Whangarei, New Zealand",
+    "preferred_vendor": true
+  }
+}
+
+## extra field: "organic"
+POST optimized_index/_doc
+{
+  "name": "Mango",
+  "botanical_name": "Harum Manis",
+  "produce_type": "Fruit",
+  "country_of_origin": "Indonesia",
+  "organic": true,
+  "date_purchased": "2020-05-02T07:15:35",
+  "quantity": 500,
+  "unit_price": 1.5,
+  "description": "Mango Arumanis or Harum Manis is originated from East Java. Arumanis means harum dan manis or fragrant and sweet just like its taste. The ripe Mango Arumanis has dark green skin coated with thin grayish natural wax. The flesh is deep yellow, thick, and soft with little to no fiber. Mango Arumanis is best eaten when ripe.",
+  "vendor_details": {
+    "vendor": "Ayra Shezan Trading",
+    "main_contact": "Suharto",
+    "vendor_location": "Binjai, Indonesia",
+    "preferred_vendor": true
+  }
+}
+
+GET optimized_index/_mapping
+
+# Reindex
+
+# yeni bir index yaratiriz
+PUT optimized_v2
+{
+  "mappings": {
+    "properties": {
+      "botanical_name": {
+        "type": "text"
+      },
+      "country_of_origin": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "date_purchased": {
+        "type": "date"
+      },
+      "description": {
+        "type": "text"
+      },
+      "name": {
+        "type": "text"
+      },
+      "organic": {
+        "type": "boolean"
+      },
+      "produce_type": {
+        "type": "keyword"
+      },
+      "quantity": {
+        "type": "long"
+      },
+      "unit_price": {
+        "type": "float"
+      },
+      "vendor_details": {
+        "type": "object",
+        "enabled": false
+      }
+    }
+  }
+}
+
+GET optimized_v2/_mapping
+
+POST _reindex
+{
+  "source": {
+    "index": "optimized_index"
+  },
+  "dest": {
+    "index": "optimized_v2"
+  }
+}
+
+
+## runtime
+PUT optimized_v2/_mapping
+{
+  "runtime": {
+    "total": {
+      "type": "double",
+      "script": {
+        "source": "emit(doc['unit_price'].value* doc['quantity'].value)"
+      }
+    }
+  }
+}
+
+GET optimized_v2/_mapping
+
+GET optimized_v2/_search
+{
+  "size": 0,
+  "aggs": {
+    "total_expense": {
+      "sum": {
+        "field": "total"
+      }
+    }
+  }
+}
+```
+
+#### mapping text vs keyword
+
+![](https://user-images.githubusercontent.com/60980933/122120075-324d5380-cde7-11eb-9b4e-744dfa6d527d.png)
