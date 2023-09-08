@@ -9,4 +9,7 @@ use (
 	./01-kafka/06-replication
 	./02-elasticsearch/feed
 	./02-elasticsearch/search
+	./03-kubernetes/producer
+	./03-kubernetes/consumer
+	./03-kubernetes/search
 )
