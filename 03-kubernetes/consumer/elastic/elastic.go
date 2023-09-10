@@ -52,3 +52,29 @@ func (e *ElasticClient) Insert(product model.Product) error {
 	fmt.Printf("Product with id: %s created\n", resp.Id_)
 	return nil
 }
+
+func (e *ElasticClient) Delete(product model.Product) error {
+	resp, err := e.client.Delete("cimri_product_index", fmt.Sprintf("%d", product.Id)).
+		Do(context.Background())
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Product with id: %s deleted\n", resp.Id_)
+	return nil
+}
+
+func (e *ElasticClient) Update(product model.Product) error {
+	resp, err := e.client.
+		Update("cimri_product_index", fmt.Sprintf("%d", product.Id)).
+		Doc(product).
+		Do(context.Background())
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Product with id: %s updated\n", resp.Id_)
+	return nil
+}

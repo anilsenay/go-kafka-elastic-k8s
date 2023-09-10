@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/anilsenay/go-kafka-elastic-k8s/kubernetes/consumer/consumer"
 	"github.com/anilsenay/go-kafka-elastic-k8s/kubernetes/consumer/elastic"
+	"github.com/anilsenay/go-kafka-elastic-k8s/kubernetes/consumer/model"
 )
 
 func main() {
@@ -27,9 +30,19 @@ func main() {
 	}
 
 	for {
-		err = consumer.Poll(elastic.Insert)
+		err = consumer.Poll(func(e model.Event) error {
+			switch e.Type {
+			case model.ProductCreated:
+				return elastic.Insert(e.Data)
+			case model.ProductDeleted:
+				return elastic.Delete(e.Data)
+			case model.ProductUpdated:
+				return elastic.Update(e.Data)
+			}
+			return nil
+		})
 		if err != nil {
-			panic(err)
+			fmt.Printf("Error: %s", err.Error())
 		}
 	}
 }

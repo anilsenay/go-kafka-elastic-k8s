@@ -33,17 +33,18 @@ func (c *Consumer) Subscribe() error {
 	return c.consumer.Subscribe(c.topic, nil)
 }
 
-func (c *Consumer) Poll(callback func(model.Product) error) error {
+func (c *Consumer) Poll(callback func(model.Event) error) error {
 	ev := c.consumer.Poll(100)
 	switch e := ev.(type) {
 	case *kafka.Message:
-		var product model.Product
-		err := json.Unmarshal(e.Value, &product)
+		var event model.Event
+		err := json.Unmarshal(e.Value, &event)
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Consumed product: %d\n", product.Id)
-		err = callback(product)
+
+		fmt.Printf("Consumed event: %s product: %d\n", event.Type, event.Data.Id)
+		err = callback(event)
 		if err != nil {
 			return err
 		}

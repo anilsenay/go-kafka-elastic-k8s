@@ -25,8 +25,12 @@ func main() {
 
 	fmt.Println(*count)
 	for i := 0; i < *count; i++ {
-		product := model.GenerateProduct()
-		msg, err := json.Marshal(product)
+		event := model.Event{
+			Type: model.ProductCreated,
+			Data: model.GenerateProduct(),
+		}
+
+		msg, err := json.Marshal(event)
 		if err != nil {
 			panic(err)
 		}
