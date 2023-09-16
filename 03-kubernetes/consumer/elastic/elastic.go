@@ -3,6 +3,7 @@ package elastic
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/anilsenay/go-kafka-elastic-k8s/kubernetes/consumer/model"
 	elasticsearch8 "github.com/elastic/go-elasticsearch/v8"
@@ -12,9 +13,12 @@ type ElasticClient struct {
 	client *elasticsearch8.TypedClient
 }
 
-func NewElasticClient() (*ElasticClient, error) {
+func NewElasticClient(hosts, user, pass string) (*ElasticClient, error) {
+	addresses := strings.Split(hosts, ",")
 	client, err := elasticsearch8.NewTypedClient(elasticsearch8.Config{
-		Addresses: []string{"http://localhost:9200"},
+		Addresses: addresses,
+		Username:  user,
+		Password:  pass,
 	})
 	if err != nil {
 		return nil, err

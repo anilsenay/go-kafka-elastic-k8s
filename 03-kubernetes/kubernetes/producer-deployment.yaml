@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-producer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-producer
+  template:
+    metadata:
+      labels:
+        app: product-producer
+    spec:
+      containers:
+        - name: product-producer
+          image: product-producer:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: KAFKA_BROKERS
+              value: "kafka-service:9092"
+          resources:
+            limits:
+              memory: 100Mi
+              cpu: "1"
+            requests:
+              memory: 50Mi
+              cpu: "0.2"

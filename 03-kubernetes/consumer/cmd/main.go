@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/anilsenay/go-kafka-elastic-k8s/kubernetes/consumer/consumer"
 	"github.com/anilsenay/go-kafka-elastic-k8s/kubernetes/consumer/elastic"
@@ -9,7 +10,11 @@ import (
 )
 
 func main() {
-	consumer, err := consumer.NewConsumer("product-topic", "product-elastic-group")
+	brokers := os.Getenv("KAFKA_BROKERS")
+	if brokers == "" {
+		brokers = "localhost:9092"
+	}
+	consumer, err := consumer.NewConsumer(brokers, "product-topic", "product-elastic-group")
 	if err != nil {
 		panic(err)
 	}
@@ -19,7 +24,13 @@ func main() {
 		panic(err)
 	}
 
-	elastic, err := elastic.NewElasticClient()
+	elasticHosts := os.Getenv("ELASTICSEARCH_HOSTS")
+	elasticUser := os.Getenv("ELASTICSEARCH_USER")
+	elasticPassword := os.Getenv("ELASTICSEARCH_PASSWORD")
+	if elasticHosts == "" {
+		elasticHosts = "localhost:9200"
+	}
+	elastic, err := elastic.NewElasticClient(elasticHosts, elasticUser, elasticPassword)
 	if err != nil {
 		panic(err)
 	}

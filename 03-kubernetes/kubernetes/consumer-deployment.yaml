@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-consumer
+  template:
+    metadata:
+      labels:
+        app: product-consumer
+    spec:
+      containers:
+        - name: product-consumer
+          image: product-consumer:latest
+          imagePullPolicy: Never
+          env:
+            - name: KAFKA_BROKERS
+              value: "kafka-service:9092"
+            - name: ELASTICSEARCH_HOSTS
+              value: "https://demo-ff9654.es.europe-west3.gcp.cloud.es.io"
+            - name: ELASTICSEARCH_USER
+              value: elastic
+            - name: ELASTICSEARCH_PASSWORD
+              value: "2qZx5c67zQ1nDuyidJi87qHt"
+          resources:
+            limits:
+              memory: 100Mi
+              cpu: "1"
+            requests:
+              memory: 50Mi
+              cpu: "0.2"

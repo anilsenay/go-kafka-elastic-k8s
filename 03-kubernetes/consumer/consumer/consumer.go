@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/anilsenay/go-kafka-elastic-k8s/kubernetes/consumer/model"
-	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
 type Consumer struct {
@@ -13,9 +13,9 @@ type Consumer struct {
 	consumer *kafka.Consumer
 }
 
-func NewConsumer(topic, groupId string) (*Consumer, error) {
+func NewConsumer(servers, topic, groupId string) (*Consumer, error) {
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers": "localhost:9092",
+		"bootstrap.servers": servers,
 		"group.id":          groupId,
 		"auto.offset.reset": "smallest",
 	})

@@ -2,6 +2,7 @@ package model
 
 type EventTypes string
 
+// It seems like "Crud Sourcing" but its okey for demo.
 const (
 	ProductCreated EventTypes = "product_created"
 	ProductUpdated EventTypes = "product_updated"

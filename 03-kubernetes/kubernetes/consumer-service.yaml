@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-consumer
+spec:
+  selector:
+    app: product-consumer
+  type: NodePort
+  ports:
+    - nodePort: 31236
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
